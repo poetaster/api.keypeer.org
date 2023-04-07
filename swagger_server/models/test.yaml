@@ -1,0 +1,84 @@
+  /v10/consumers/{consumer_id}/providers/{provider_id}:
+    get:
+      tags:
+        - consumers
+      summary: Retrieve Service Api keys for users provider, provider_id
+      description: |
+        Returns service api key
+      parameters:
+        - in: path
+          name: consumer_id
+          description: Consumer ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: provider_id
+          description: Consumer Provider ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Returns service api keys for Provider and user
+          content:
+            provider/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/consumer_provider'
+        '400':
+          description: bad input parameter
+    post:
+      tags:
+        - consumers
+        - admins
+      summary: Add consumer provider
+      description: |
+        Returns true if consumer provider is added
+      parameters:
+        - in: path
+          name: consumer_id
+          description: consumer_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: provider_id
+          description: Consumer Provider ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Request to add consumer provider 
+        required: true
+        content:
+          provider/json:
+            schema:
+              $ref: '#/components/schemas/consumer'
+      responses:
+        '201':
+          description: success
+    delete:
+      tags:
+        - consumers
+        - admins
+      summary: remove consumer provider
+      description: |
+        Returns true if consumer provider is updated
+      parameters:
+        - in: path
+          name: consumer_id
+          description: Consumer ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: provider_id
+          description: Consumer Provider ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: delete success

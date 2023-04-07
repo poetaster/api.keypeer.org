@@ -1,0 +1,652 @@
+openapi: 3.0.0
+info:
+  title: Keypeer Api
+  description: Proposed API
+  contact:
+    email: admin@keypeer.org
+  license:
+    name: GPLv2
+    url: https://api.keypeer.org
+  version: "1.0"
+servers:
+- url: https://api.keypeer.org/v1.0
+  description: API Auto Mocking
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: consumers
+  description: Operations available on consumers
+- name: providers
+  description: Operations available on providers
+- name: applications
+  description: Operations available on applications
+paths:
+  /providers:
+    get:
+      tags:
+      - admins
+      summary: Provider ID list
+      description: Returns a list of providers
+      operationId: providers_get
+      responses:
+        "200":
+          description: Returns a list of providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/provider'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+    post:
+      tags:
+      - admins
+      summary: Add provider
+      description: |
+        Returns new provider ID (and?) if provider is added
+      operationId: providers_post
+      requestBody:
+        description: Request to add consumer application
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/provider'
+        required: true
+      responses:
+        "200":
+          description: Return New Provider name/key
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/provider'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /providers/{provider_id}:
+    get:
+      tags:
+      - admins
+      summary: Service API KEY
+      description: "Returns the provider service api key for {provider_id} \n"
+      operationId: providers_provider_id_get
+      parameters:
+      - name: provider_id
+        in: path
+        description: Internal ID for available services
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Return service api key
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/provider'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /consumers/{consumer_id}:
+    get:
+      tags:
+      - consumers
+      summary: Request user data
+      description: |
+        Returns a dict containing varoius user data
+      operationId: consumers_consumer_id_get
+      parameters:
+      - name: consumer_id
+        in: path
+        description: End User ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Return User Data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/consumer'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+  /consumers:
+    get:
+      tags:
+      - admins
+      summary: Request user data
+      description: |
+        Returns a dict userids
+      operationId: consumers_get
+      responses:
+        "200":
+          description: Return Userids
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/consumer'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /consumers/{consumer_id}/applications/{application_id}:
+    get:
+      tags:
+      - consumers
+      summary: "Retrieve Service Api keys for users application, application_id"
+      description: |
+        Returns service api key
+      operationId: consumers_consumer_id_applications_application_id_get
+      parameters:
+      - name: consumer_id
+        in: path
+        description: Consumer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: application_id
+        in: path
+        description: Consumer Application ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Returns service api keys for Application and user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/consumer_application'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+    delete:
+      tags:
+      - consumers
+      - admins
+      summary: remove consumer application
+      description: |
+        Returns true if consumer application is updated
+      operationId: consumers_consumer_id_applications_application_id_delete
+      parameters:
+      - name: consumer_id
+        in: path
+        description: Consumer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: application_id
+        in: path
+        description: Consumer Application ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: delete success
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+  /consumers/{consumer_id}/applications:
+    post:
+      tags:
+      - consumers
+      - admins
+      summary: Add consumer application
+      description: |
+        Returns true if consumer application is added
+      operationId: consumers_consumer_id_applications_post
+      parameters:
+      - name: consumer_id
+        in: path
+        description: Consumer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request to add consumer application
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/consumer_application'
+        required: true
+      responses:
+        "201":
+          description: success
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+  /consumers/{consumer_id}/providers/{provider_id}:
+    get:
+      tags:
+      - consumers
+      summary: "Retrieve Service Api keys for users provider, provider_id"
+      description: |
+        Returns service api key
+      operationId: consumers_consumer_id_providers_provider_id_get
+      parameters:
+      - name: consumer_id
+        in: path
+        description: Consumer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: provider_id
+        in: path
+        description: Consumer Provider ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Returns service api keys for Provider and user
+          content:
+            provider/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/consumer_provider'
+                x-content-type: provider/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+    delete:
+      tags:
+      - consumers
+      - admins
+      summary: remove consumer provider
+      description: |
+        Returns true if consumer provider is updated
+      operationId: consumers_consumer_id_providers_provider_id_delete
+      parameters:
+      - name: consumer_id
+        in: path
+        description: Consumer ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: provider_id
+        in: path
+        description: Consumer Provider ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: delete success
+      x-openapi-router-controller: swagger_server.controllers.consumers_controller
+  /consumers/{consumer_id}/providers:
+    post:
+      tags:
+      - admins
+      summary: Add consumer provider
+      description: |
+        Returns true if consumer provider is added
+      operationId: consumers_consumer_id_providers_post
+      parameters:
+      - name: consumer_id
+        in: path
+        description: consumer_id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Request to add consumer provider
+        content:
+          provider/json:
+            schema:
+              $ref: '#/components/schemas/consumer_provider'
+        required: true
+      responses:
+        "201":
+          description: success
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /applications:
+    get:
+      tags:
+      - admins
+      summary: Return array of applications
+      description: |
+        Obtain list of application providers
+      operationId: applications_get
+      responses:
+        "200":
+          description: Returns service api key
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/application'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+    post:
+      tags:
+      - admins
+      summary: Add application
+      description: |
+        Returns true if consumer application is added
+      operationId: applications_post
+      requestBody:
+        description: Request to add an application
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/application'
+        required: true
+      responses:
+        "201":
+          description: success
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /applications/{application_id}:
+    get:
+      tags:
+      - applications
+      summary: "Return application name, uri, uuid"
+      description: |
+        Obtain list of application providers
+      operationId: applications_application_id_get
+      parameters:
+      - name: application_id
+        in: path
+        description: Consumer Application ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Returns service api key
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/application'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.applications_controller
+  /applications/{application_id}/providers:
+    get:
+      tags:
+      - applications
+      summary: Return array of application providers
+      description: |
+        Obtain application provider keys
+      operationId: applications_application_id_providers_get
+      parameters:
+      - name: application_id
+        in: path
+        description: Consumer Application ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Return array of application provider keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/application'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.applications_controller
+  /applications/{application_id}/providers/{provider_id}:
+    get:
+      tags:
+      - applications
+      summary: Return provider key for provider_id
+      description: |
+        Obtain application provider keys
+      operationId: applications_application_id_providers_provider_id_get
+      parameters:
+      - name: application_id
+        in: path
+        description: Consumer Application ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: provider_id
+        in: path
+        description: Internal ID for available services
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Return array of application provider keys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/application_provider'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.applications_controller
+components:
+  schemas:
+    provider:
+      required:
+      - name
+      - uri
+      type: array
+      items:
+        $ref: '#/components/schemas/provider_inner'
+    consumer:
+      required:
+      - uuid
+      type: array
+      items:
+        $ref: '#/components/schemas/consumer_inner'
+    consumer_application:
+      required:
+      - application_id
+      - consumer_id
+      - expiry
+      - provider_id
+      type: array
+      items:
+        $ref: '#/components/schemas/consumer_application_inner'
+    consumer_provider:
+      required:
+      - consumer_id
+      - expiry
+      - provider_id
+      type: array
+      items:
+        $ref: '#/components/schemas/consumer_provider_inner'
+    application:
+      required:
+      - name
+      - uri
+      type: array
+      items:
+        $ref: '#/components/schemas/application_inner'
+    application_provider:
+      required:
+      - application_id
+      - expiry
+      - provider_id
+      type: array
+      items:
+        $ref: '#/components/schemas/application_provider_inner'
+    provider_inner:
+      type: object
+      properties:
+        provider_id:
+          type: integer
+          format: int64
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Mapbox
+        uri:
+          type: string
+          format: url
+          example: https://mapbox.com
+      example:
+        name: Mapbox
+        provider_id: 1
+        uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        uri: https://mapbox.com
+    consumer_inner:
+      type: object
+      properties:
+        consumer_id:
+          type: integer
+          format: int64
+          example: 1
+        uuid:
+          type: string
+          format: uuid
+          example: d290f1ff-6c54-4b01-90e6-d701748f0851
+      example:
+        consumer_id: 1
+        uuid: d290f1ff-6c54-4b01-90e6-d701748f0851
+    consumer_application_inner:
+      type: object
+      properties:
+        consumer_id:
+          type: integer
+          format: int64
+          example: 1
+        application_id:
+          type: integer
+          format: int64
+          example: 2
+        provider_id:
+          type: integer
+          format: int64
+          example: 3
+        expiry:
+          type: string
+          description: ISO 8601 Format
+          example: 2023-03-25T16:33:23Z
+      example:
+        consumer_id: 1
+        provider_id: 3
+        expiry: 2023-03-25T16:33:23Z
+        application_id: 2
+    consumer_provider_inner:
+      type: object
+      properties:
+        consumer_id:
+          type: string
+          format: uuid
+        provider_id:
+          type: string
+          format: uuid
+        service_api_key:
+          type: string
+          format: uuid
+        expiry:
+          type: string
+          description: ISO 8601 Format
+          example: 2023-03-25T16:33:23Z
+      example:
+        consumer_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        provider_id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        expiry: 2023-03-25T16:33:23Z
+        service_api_key: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+    application_inner:
+      type: object
+      properties:
+        application_id:
+          type: integer
+          format: int64
+        uuid:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Mapbox
+        uri:
+          type: string
+          format: url
+          example: https://mapbox.com
+      example:
+        name: Mapbox
+        application_id: 0
+        uuid: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        uri: https://mapbox.com
+    application_provider_inner:
+      type: object
+      properties:
+        application_id:
+          type: string
+          format: uuid
+          example: 42409b08-c68f-44fa-94c7-a46f613e9492
+        provider_id:
+          type: string
+          format: uuid
+          example: 253e907b-8070-4ee8-ba58-1ba4f02c097c
+        service_api_key:
+          type: string
+          format: uuid
+          example: 1f17d5c5-a9a2-4b3d-94fc-3a6af3c037c8
+        expiry:
+          type: string
+          description: ISO 8601 Format
+          example: 2023-03-25T16:33:23Z
+      example:
+        provider_id: 253e907b-8070-4ee8-ba58-1ba4f02c097c
+        expiry: 2023-03-25T16:33:23Z
+        application_id: 42409b08-c68f-44fa-94c7-a46f613e9492
+        service_api_key: 1f17d5c5-a9a2-4b3d-94fc-3a6af3c037c8
+
